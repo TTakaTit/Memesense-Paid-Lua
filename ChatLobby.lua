@@ -1,4 +1,3 @@
-print("Hello")
 local function Register_HandleChatCommand()
     Panorama.LoadString([[
 
