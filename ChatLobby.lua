@@ -182,6 +182,7 @@ local m_Commands            = true
 
 local m_RegisterHandles = true
 Cheat.RegisterCallback("draw", function()
+	Render.Circle(Vector2.new(100.0, 100.0), Color.new(1.0, 1.0, 1.0, 1.0), 32.0, 60)
     if (EngineClient.IsInGame()) then 
         m_RegisterHandles = true
         return 
