@@ -1,165 +1,41 @@
-local username = Cheat.GetCheatUserName()
-local client_console_cmd = EngineClient.ExecuteClientCmd
+Menu.Text("------- Gradient ColorBar -------")
+Menu.Text("Made by: TTakaTit#9492")
+Menu.Text("")
 
-local welcometext = function()
-        client_console_cmd("clear")
-        print('Welcome '..username..'!')
-        print('Creator: Maxi1337_')
-    end
+--local rain = Menu.Checkbox("RainBow", false)
+local thick = Menu.SliderInt("Thickness", 5, 1, 100)
+--local color = Menu.ColorEdit("Color", Color.new(1.0, 1.0, 1.0, 1.0))
+local alpha = Menu.SliderFloat("Alpha", 255, 0.0, 255.0)
+local speed = Menu.SliderFloat("Speed", 5.0, 1.0, 10.0)
 
-Panorama.LoadString([[
-    var collectedSteamIDS = []
+local screen = EngineClient.GetScreenSize()
 
-    var OnyxWaitPUpdate = null;
-    function OnyxStop() {
-        if (OnyxWaitPUpdate != null) {
-            $.UnregisterForUnhandledEvent( 'PanoramaComponent_Lobby_PlayerUpdated', OnyxWaitPUpdate);
-            OnyxWaitPUpdate = null;
-        }
-    }
-
-    OnyxStop();
-    var playerData = {
-        update: {
-            members: {
-            }
-        }
-    }
-    var updateMessage = "";
-]])
-
-welcometext()
-
-
-local refresh_nearbies = function()
-    Panorama.LoadString([[
-        PartyBrowserAPI.Refresh();
-        var lobbies = PartyBrowserAPI.GetResultsCount();
-        for (var lobbyid = 0; lobbyid < lobbies; lobbyid++) {
-            var xuid = PartyBrowserAPI.GetXuidByIndex(lobbyid);
-            var name = PartyListAPI.GetFriendName(xuid)
-            if (!collectedSteamIDS.includes(xuid)) {
-                collectedSteamIDS.push(xuid);
-                $.Msg(`[Added] name: [${name}] id: [${xuid}] to the collection..`);
-            }
-        } 
-
-        $.Msg(`[Collected]: [ ${collectedSteamIDS.length} ]`);
-    
-    ]])
-end
-
-
-
-Menu.GroupBox("[ Chat spam ]")
-local input = Menu.InputText("[X] Chat spam message", "Get Good. Get MemeSense.", 64, function(text)
+Cheat.RegisterCallback("draw", function()
+	--if rain:Get() == true then 
+		--alpha:SetVisible(true)
+		--speed:SetVisible(true)
+		--color:SetVisible(false)
+		local i = alpha:Get()
+		local t = thick:Get()
+		local realtime = GlobalVars.realtime * speed:Get()
+		local r1 = math.floor(math.sin(realtime + 0) * 127 + 128);
+		local g1 = math.floor(math.sin(realtime + 4) * 127 + 128);
+		local b1 = math.floor(math.sin(realtime + 8) * 127 + 128);
+	
+		local r2 = math.floor(math.sin(realtime + 12) * 127 + 128);
+		local g2 = math.floor(math.sin(realtime + 16) * 127 + 128);
+		local b2 = math.floor(math.sin(realtime + 20) * 127 + 128);
+	
+		local r3 = math.floor(math.sin(realtime + 24) * 127 + 128);
+		local g3 = math.floor(math.sin(realtime + 28) * 127 + 128);
+		local b3 = math.floor(math.sin(realtime + 32) * 127 + 128);
+		
+		Render.RectFilledMultiColor(Vector2.new(0, 0), Vector2.new(screen.x, t), Color.RGBA(r2, g2, b2, i), Color.RGBA(r3, g3, b3, i), Color.RGBA(r2, g2, b2, i), Color.RGBA(r1, g1, b1, i))
+		
+	--else
+		--alpha:SetVisible(false)
+		--speed:SetVisible(false)
+		--color:SetVisible(true)
+		--Render.Line(Vector2.new(0,(thick:Get()/2)-1), Vector2.new(screen.x,(thick:Get()/2)-1), Color.new(1,1,1,1),thick:Get())
+	--end
 end)
-
-local chatvalue = Menu.SliderInt(" [ X ] Chat spam value [ X ]", 1, 0, 1000, function()
-end)
-
-Menu.Button("[ X ] Chat spam [ X ]", function()
-
-local texts = input:Get()
-    
-        for i = 1, chatvalue:Get() do
-        Panorama.LoadString([[
-            var LobbyChat = $('#MainMenu').FindChildInLayoutFile('PartyChat');
-            var LobbyChatInput = LobbyChat.FindChildInLayoutFile('ChatInput');
-            
-            LobbyChatInput.text = "]] ..texts.. [["
-            LobbyChat.SubmitChatText();
-            LobbyChatInput.text = ""
-        ]])
-        end
-end)
-
-Menu.GroupBox("[ Invite's ]")
-Menu.Button("[ X ] invite all [ X ]", function()
-
-    
-    Panorama.LoadString([[
-        PartyBrowserAPI.Refresh();
-        var Players = PartyBrowserAPI.GetResultsCount();
-        for (var i = 0; i < Players; i++) {
-        FriendsListAPI.ActionInviteFriend(PartyBrowserAPI.GetXuidByIndex(i), "");
-    }
-    ]])
-end)
-
-Menu.Button("[ X ] invite all (collected) [ X ]", function()
-        Panorama.LoadString([[
-            collectedSteamIDS.forEach(xuid => {
-                FriendsListAPI.ActionInviteFriend(xuid, "");
-            });
-        ]])
-        refresh_nearbies()
-    end)
-
-local collect = Menu.Checkbox("Collect invites", false)
-
-local next_update = -1.0
-
-Cheat.RegisterCallback('draw', function ()
-    if collect:Get() == true then
-        if next_update < GlobalVars.realtime then
-        refresh_nearbies()
-        --print("yes!")
-        next_update = GlobalVars.realtime + 3
-    end      
-    end
-end)
-
-
-Menu.GroupBox("[ Window spam ]")
-local windowsvalue = Menu.SliderInt(" [ X ] Windows value [ X ]", 100, 0, 500, function()
-end)
-
-
-Menu.Button("[ X ] window spam [ X ]", function()
-    for i = 1, windowsvalue:Get() do
-
-    Panorama.LoadString([[
-        PartyListAPI.SessionCommand("Game::HostEndGamePlayAgain", `run all xuid ${MyPersonaAPI.GetXuid()}`); 
-        ]])
-
-    end
-end)
-
-Menu.Button("[ X ] close windows [ X ]", function()
-    
-    Panorama.LoadString([[
-        UiToolkitAPI.CloseAllVisiblePopups();
-    ]])
-
-end)
-
-Menu.GroupBox("[ Fun ]")
-Menu.Button("[ X ] Stop que [ X ]", function()
-        
-        Panorama.LoadString([[
-            LobbyAPI.StopMatchmaking();
-        ]])
-
-end)
-
-Menu.Text(" ")
-Menu.Button("[VAC] ON", function()
-        
-    Panorama.LoadString([[
-        UiToolkitAPI.ShowGenericPopupOkBgStyle('Disconnected', 'VAC banned from secure server.', '', function() {}, 'dim');
-        MyPersonaAPI.IsVacBanned = function() { return 1 };
-        LobbyAPI.UpdateSessionSettings = function() {};
-    ]])
-
-end)
-
-Menu.Button("[VAC] OFF", function()
-        
-    Panorama.LoadString([[
-        MyPersonaAPI.IsVacBanned = function() { return 0 };
-    ]])
-
-end)
-
-
